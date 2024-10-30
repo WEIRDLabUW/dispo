@@ -1,7 +1,3 @@
-hydra:
-  run:
-    dir: logdir/${algo}/${env_id}/${exp_id}/${seed}
-
 defaults:
   - dsf
   - _self_
