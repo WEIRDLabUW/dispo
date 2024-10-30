@@ -61,20 +61,20 @@ def get_planner(planner, guidance_fn, num_samples, num_elites):
         rng, sample_rng = jax.random.split(rng)
         if planner == "random_shooting":
             obs_batch = obs.repeat(num_samples, 0)
-            psis, _ = psi_sampler(psi.ema_params, sample_rng, obs_batch)
+            psis = psi_sampler(psi.ema_params, sample_rng, obs_batch)
             values = w(psis).sum(-1)
             sorted_inds = jnp.argsort(-values, axis=0)
             best_psi = psis[sorted_inds[:num_elites]].mean(axis=0, keepdims=True)
         elif planner == "guided_diffusion":
             g = guidance_fn(w)
-            psis, _ = psi_sampler(psi.ema_params, sample_rng, obs, g)
+            psis = psi_sampler(psi.ema_params, sample_rng, obs, g)
             best_psi = psis
         else:
             raise NotImplementedError(f"Unsupported planner: {planner}")
 
         # Predict action
         rng, sample_rng = jax.random.split(rng)
-        action, _ = policy_sampler(
+        action = policy_sampler(
             policy.ema_params, sample_rng, jnp.concatenate([obs, best_psi], -1)
         )
 

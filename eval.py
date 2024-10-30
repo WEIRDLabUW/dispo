@@ -10,7 +10,7 @@ from environments import make_env_and_dataset
 from train import build_models, evaluate
 
 
-@hydra.main(version_base=None, config_path="configs/", config_name="atrl.yaml")
+@hydra.main(version_base=None, config_path="configs/", config_name="dsf.yaml")
 def main(config):
     # Make environment and dataset
     env, dataset = make_env_and_dataset(
@@ -29,7 +29,6 @@ def main(config):
         policy_sampler,
         policy_loss_fn,
         w,
-        w_loss_fn,
         planner,
         rng,
     ) = build_models(config, env, dataset, rng)
@@ -37,18 +36,13 @@ def main(config):
     # Load checkpoints
     checkpointer = checkpoint.PyTreeCheckpointer()
     options = checkpoint.CheckpointManagerOptions(max_to_keep=2, create=True)
-    if os.path.exists(os.path.join(config.logdir, "w")):
-        checkpoint_manager = checkpoint.CheckpointManager(
-            os.path.abspath(os.path.join(config.logdir, "w")), checkpointer, options
-        )
-    else:
-        checkpoint_manager = checkpoint.CheckpointManager(
-            os.path.abspath(config.logdir), checkpointer, options
-        )
-    target = {"config": config, "psi": psi, "policy": policy, "w": w}
+    checkpoint_manager = checkpoint.CheckpointManager(
+        os.path.abspath(config.logdir), checkpointer, options
+    )
+    target = {"config": config, "psi": psi, "policy": policy}
     step = checkpoint_manager.latest_step()
     ckpt = checkpoint_manager.restore(step, items=target)
-    psi, policy, w = ckpt["psi"], ckpt["policy"], ckpt["w"]
+    psi, policy = ckpt["psi"], ckpt["policy"]
 
     # Evaluate online
     ep_returns = []

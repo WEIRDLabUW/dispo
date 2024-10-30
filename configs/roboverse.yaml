@@ -3,12 +3,12 @@ hydra:
     dir: logdir/${algo}/${env_id}/${exp_id}/${seed}
 
 defaults:
-  - atrl
+  - dsf
+  - _self_
 
-reward_min: 0
-reward_max: 4
+feat:
+  type: "dummy"
 
 planning:
   planner: "guided_diffusion"
-  guidance_coef: 0.001
-
+  guidance_coef: 0.05

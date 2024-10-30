@@ -6,6 +6,8 @@ gym.logger.set_level(40)
 
 from .features import (
     FeatureDataset,
+    LaplacianFeatureWrapper,
+    DynamicsFeatureWrapper,
     RandomFeatureWrapper,
     FourierFeatureWrapper,
     PolynomialFeatureWrapper,
@@ -73,6 +75,19 @@ def make_env_and_dataset(
         env = gym.make("antmaze-medium-diverse-v2")
         env = AntMazeMultigoalWrapper(env, mode)
         dataset = AntMazePreferenceDataset(env)
+    elif suite == "hopper":
+        from .locomotion.hopper import HopperEnv, HopperJumpEnv, HopperStandEnv, HopperBackwardEnv
+        from .datasets import RaMPDataset
+        if task == "fast":
+            env = HopperEnv(seed)
+        elif task == "jump":
+            env = HopperJumpEnv(seed)
+        elif task == "stand":
+            env = HopperStandEnv(seed)
+        elif task == "backward":
+            env = HopperBackwardEnv(seed)
+        env = TimeLimit(env, 800)
+        dataset = RaMPDataset(env)
     else:
         raise NotImplementedError
 
@@ -93,6 +108,10 @@ def make_env_and_dataset(
             wrapper_cls = partial(RandomFeatureWrapper, rand_feat_dim=feature_dim)
         elif feature == "fourier":
             wrapper_cls = partial(FourierFeatureWrapper, rand_feat_dim=feature_dim)
+        elif feature == "laplacian":
+            wrapper_cls = partial(LaplacianFeatureWrapper, raw_feat_dim=feature_dim)
+        elif feature == "dynamics":
+            wrapper_cls = partial(DynamicsFeatureWrapper, raw_feat_dim=feature_dim)
         else:
             raise NotImplementedError("Unsupported feature type")
         # Wrap environment in feature wrapper

@@ -129,27 +129,14 @@ def build_models(config, env, dataset, rng):
         eta=config.sampling.eta,
     )
 
-    # Initialize regression weights
+    # Infer reward weights
     w_def = nn.Dense(1, use_bias=False)
-    rng, w_rng = jax.random.split(rng)
-    w_params = w_def.init(w_rng, init_psi)["params"]
+    reward_weights = dataset.infer_reward_weights(config.num_reward_samples)
+    w_params = {"kernel": reward_weights}
     w = TrainState.create(
         model_def=w_def,
         params=w_params,
-        tx=optax.adam(learning_rate=config.model.lr),
     )
-
-    def w_loss_fn(params, x, y):
-        if config.training.weighted_regression:
-            # Add small epsilon to not completely ignore zero rewards
-            y_hat = w_def.apply({"params": params}, x)
-            eps = dataset.rewards.sum() / len(dataset)
-            weight = y + eps
-            loss = jnp.mean(weight * (y_hat - y) ** 2)
-        else:
-            y_hat = w_def.apply({"params": params}, x)
-            loss = jnp.mean((y_hat - y) ** 2)
-        return loss, {"loss": loss}
 
     # Build planner
     guidance_fn = (
@@ -170,7 +157,6 @@ def build_models(config, env, dataset, rng):
         policy_sampler,
         policy_loss_fn,
         w,
-        w_loss_fn,
         planner,
         rng,
     )
@@ -183,7 +169,6 @@ def build_models(config, env, dataset, rng):
         "psi_sampler",
         "psi_loss_fn",
         "policy_loss_fn",
-        "w_loss_fn",
     ),
 )
 def update(
@@ -194,13 +179,11 @@ def update(
     psi_loss_fn,
     policy,
     policy_loss_fn,
-    w,
-    w_loss_fn,
     batch,
 ):
     # Sample target psi
     rng, sample_rng = jax.random.split(rng)
-    next_psi, _ = psi_sampler(psi.ema_params, sample_rng, batch["next_observations"])
+    next_psi = psi_sampler(psi.ema_params, sample_rng, batch["next_observations"])
     target_psi = batch["features"] + config.gamma * next_psi
 
     # Update psi
@@ -224,21 +207,11 @@ def update(
         has_aux=True,
     )
 
-    # Update w
-    # Predict rewards from next states
-    w, w_info = w.apply_loss_fn(
-        loss_fn=w_loss_fn,
-        x=batch["next_features"],
-        y=batch["rewards"],
-        has_aux=True,
-    )
-
     train_info = {
         "train/psi_loss": psi_info["loss"],
         "train/policy_loss": policy_info["loss"],
-        "train/w_loss": w_info["loss"],
     }
-    return rng, psi, policy, w, train_info
+    return rng, psi, policy, train_info
 
 
 def evaluate(config, rng, env, planner, psi, psi_sampler, policy, policy_sampler, w):
@@ -296,7 +269,7 @@ def evaluate(config, rng, env, planner, psi, psi_sampler, policy, policy_sampler
     return rng, eval_info
 
 
-@hydra.main(version_base=None, config_path="configs/", config_name="atrl.yaml")
+@hydra.main(version_base=None, config_path="configs/", config_name="dsf.yaml")
 def train(config):
     # Initialize wandb
     wandb.init(
@@ -337,7 +310,6 @@ def train(config):
         policy_sampler,
         policy_loss_fn,
         w,
-        w_loss_fn,
         planner,
         rng,
     ) = build_models(config, env, dataset, rng)
@@ -355,7 +327,7 @@ def train(config):
     for epoch in range(num_epochs):
         for batch in dataloader:
             batch = {k: jnp.array(v) for k, v in batch.items()}
-            rng, psi, policy, w, train_info = update(
+            rng, psi, policy, train_info = update(
                 config,
                 rng,
                 psi,
@@ -363,8 +335,6 @@ def train(config):
                 psi_loss_fn,
                 policy,
                 policy_loss_fn,
-                w,
-                w_loss_fn,
                 batch,
             )
             wandb.log(train_info)

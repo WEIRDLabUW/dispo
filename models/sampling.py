@@ -412,8 +412,6 @@ def get_pc_sampler(
 
         _, x, x_mean = jax.lax.fori_loop(0, n_inference_steps, loop_body, (rng, x, x))
         # Denoising is equivalent to running one predictor step without adding noise.
-        return inverse_scaler(x_mean if denoise else x), n_inference_steps * (
-            n_corrector_steps + 1
-        )
+        return inverse_scaler(x_mean if denoise else x)
 
     return pc_sampler

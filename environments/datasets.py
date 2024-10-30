@@ -1,12 +1,9 @@
 import glob
 import os
-import sys
 
 import numpy as np
 import torch
-from torch.multiprocessing import Pool
 from torch.utils.data import Dataset
-from tqdm.rich import trange
 
 
 class OfflineDataset(Dataset):
@@ -128,3 +125,36 @@ class AntMazePreferenceDataset(OfflineDataset):
             dataset["next_observations"],
             dataset["terminals"],
         )
+
+class RaMPDataset(OfflineDataset):
+    def __init__(self, env, dataset_dir="data/ramp"):
+        data_dir = os.path.join(dataset_dir, "HopperEnv-v5", "rand_2048")
+        rollout_fns = sorted(glob.glob(os.path.join(data_dir, "*.rollout")))
+        
+        observations, actions, rewards, next_observations, dones = [], [], [], [], []
+        for rollout_fn in rollout_fns:
+            rollout = torch.load(rollout_fn)
+            obs_dim = rollout["obs"].shape[2]
+            action_dim = rollout["action"].shape[2]
+            
+            # Flatten out episodes
+            observations.append(rollout["obs"][:, :-1].reshape(-1, obs_dim))
+            actions.append(rollout["action"][:, :-1].reshape(-1, action_dim))
+            next_observations.append(rollout["obs"][:, 1:].reshape(-1, obs_dim))
+            raw_dones = np.zeros_like(rollout["done"][:, 1:].reshape(-1, 1))
+            raw_dones[-1] = 1
+            dones.append(raw_dones)
+
+            # Relabel rewards by querying the environment
+            env_rewards = np.array([env.compute_reward(o) for o in next_observations[-1]])
+            rewards.append(env_rewards)
+            
+        
+        return super().__init__(
+            np.concatenate(observations),
+            np.concatenate(actions),
+            np.concatenate(rewards),
+            np.concatenate(next_observations),
+            np.concatenate(dones),
+        )
+        

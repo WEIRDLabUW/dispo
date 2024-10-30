@@ -1,0 +1,15 @@
+hydra:
+  run:
+    dir: logdir/${algo}/${env_id}/${exp_id}/${seed}
+
+defaults:
+  - dsf
+  - _self_
+
+reward_min: 0
+reward_max: 4
+
+planning:
+  planner: "guided_diffusion"
+  guidance_coef: 0.001
+

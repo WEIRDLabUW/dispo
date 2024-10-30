@@ -2,7 +2,7 @@ hydra:
   run:
     dir: logdir/${algo}/${env_id}/${exp_id}/${seed}
 
-algo: "atrl"
+algo: "dsf"
 seed: 0
 env_id: "antmaze-medium-diverse-v2"
 exp_id: "default"
@@ -10,6 +10,7 @@ logdir: ${hydra:run.dir}
 gamma: 0.99
 reward_min: 0
 reward_max: 1
+num_reward_samples: 10000
 
 feat:
   type: "fourier"
@@ -45,7 +46,7 @@ sampling:
   eta: 0.0
 
 planning:
-  planner: "guided_diffusion"
+  planner: "random_shooting"
   guidance_coef: 0.5
   num_samples: 1000
   num_elites: 1
