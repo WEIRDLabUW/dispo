@@ -10,7 +10,7 @@ from environments import make_env_and_dataset
 from train import build_models, evaluate
 
 
-@hydra.main(version_base=None, config_path="configs/", config_name="dsf.yaml")
+@hydra.main(version_base=None, config_path="configs/", config_name="dispo.yaml")
 def main(config):
     # Make environment and dataset
     env, dataset = make_env_and_dataset(

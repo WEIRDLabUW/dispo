@@ -2,7 +2,7 @@ hydra:
   run:
     dir: logdir/${algo}/${env_id}/${exp_id}/${seed}
 
-algo: "dsf"
+algo: "dispo"
 seed: 0
 env_id: "antmaze-medium-diverse-v2"
 exp_id: "default"

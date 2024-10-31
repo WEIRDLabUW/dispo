@@ -8,7 +8,7 @@ from tqdm.rich import tqdm
 from environments import make_env_and_dataset
 
 
-@hydra.main(version_base=None, config_path="configs/", config_name="dsf.yaml")
+@hydra.main(version_base=None, config_path="configs/", config_name="dispo.yaml")
 def train(config):
     # Initialize wandb
     wandb.init(

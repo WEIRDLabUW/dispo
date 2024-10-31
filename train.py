@@ -269,7 +269,7 @@ def evaluate(config, rng, env, planner, psi, psi_sampler, policy, policy_sampler
     return rng, eval_info
 
 
-@hydra.main(version_base=None, config_path="configs/", config_name="dsf.yaml")
+@hydra.main(version_base=None, config_path="configs/", config_name="dispo.yaml")
 def train(config):
     # Initialize wandb
     wandb.init(

@@ -1,12 +1,12 @@
 ## Distributional Successor Features Enable Zero-Shot Policy Optimization
 
-####  [[Website]](https://weirdlabuw.github.io/dsf/) [[Paper]](https://arxiv.org/abs/2403.06328) 
+####  [[Website]](https://weirdlabuw.github.io/dispo/) [[Paper]](https://arxiv.org/abs/2403.06328) 
 
 [Chuning Zhu](https://homes.cs.washington.edu/~zchuning/), [Xinqi Wang](https://elliotxinqiwang.github.io/), [Tyler Han](https://thanandnow.github.io/), [Simon Shaolei Du](https://simonshaoleidu.com/), [Abhishek Gupta](https://homes.cs.washington.edu/~abhgupta/)<br/>
 
 University of Washington
 
-This is a Jax implementation of Distributional Successor Features (DSFs). DSF is an unsupervised reinforcement learning method that models the distribution of all possible outcomes represented as discounted sums of state-dependent cumulants. The outcome model is paired with a readout policy that produces an action to realize a particular outcome. Assuming a linear dependence of rewards on cumulants, transferring to downstream tasks reduces to performing linear regression and solving a simple optimization problem for the optimal possible outcome. 
+This is a Jax implementation of Distributional Successor Features for Zero-Shot Policy Optimization (DiSPOs). DiSPO is an unsupervised reinforcement learning method that models the distribution of all possible outcomes represented as discounted sums of state-dependent cumulants. The outcome model is paired with a readout policy that produces an action to realize a particular outcome. Assuming a linear dependence of rewards on cumulants, transferring to downstream tasks reduces to performing linear regression and solving a simple optimization problem for the optimal possible outcome. 
 
 ## Instructions
 
@@ -22,7 +22,7 @@ pip install -r requirements.txt
 
 
 ## D4RL Experiments
-To train DSFs on D4RL datasets and adapt to the default tasks, run the following commands
+To train DiSPOs on D4RL datasets and adapt to the default tasks, run the following commands
 ```
 # Antmaze
 python train.py --config-name antmaze.yaml env_id=antmaze-umaze-v2 exp_id=benchmark seed=0
@@ -37,7 +37,7 @@ python train.py --config-name kitchen.yaml env_id=kitchen-partial-v0 exp_id=benc
 python train.py --config-name kitchen.yaml env_id=kitchen-mixed-v0 exp_id=benchmark seed=0
 ```
 
-To adapt a trained DSF to a new downstream reward, relabel subsampled transitions with the new reward function (e.g. by adding a env wrapper and modifying the dataset class) and run the following command (changing `env_id` correspondingly)
+To adapt DiSPOs to a new downstream reward, relabel subsampled transitions with the new reward function (e.g. by adding a env wrapper and modifying the dataset class) and run the following command (changing `env_id` correspondingly)
 ```
 python eval.py --config-name antmaze.yaml env_id=antmaze-medium-diverse-v2 exp_id=benchmark seed=0
 ```
@@ -55,7 +55,7 @@ python train.py --config-name antmaze.yaml env_id=multimodal-antmaze-1 exp_id=be
 
 
 ## Roboverse experiments
-To run the roboverse experiments, download the roboverse dataset from this [link](https://drive.google.com/drive/folders/1jxBQE1adsFT1sWsfatbhiZG6Zkf3EW0Q) and place the files `data/roboverse` under the project root directory. Use one of the following commands to train a DSF.
+To run the roboverse experiments, download the roboverse dataset from this [link](https://drive.google.com/drive/folders/1jxBQE1adsFT1sWsfatbhiZG6Zkf3EW0Q) and place the files `data/roboverse` under the project root directory. Use one of the following commands to train a DiSPO.
 ```
 python train.py --config-name roboverse.yaml env_id=roboverse-pickplace-v0 exp_id=benchmark seed=0
 python train.py --config-name roboverse.yaml env_id=roboverse-doubledraweropen-v0 exp_id=benchmark seed=0
@@ -66,7 +66,7 @@ python train.py --config-name roboverse.yaml env_id=roboverse-doubledrawercloseo
 If you find this code useful, please cite:
 
 ```
-@article{zhu2024dsf,
+@article{zhu2024dispo,
     author    = {Zhu, Chuning and Wang, Xinqi and Han, Tyler and Du, Simon Shaolei and Gupta, Abhishek},
     title     = {Distributional Successor Features Enable Zero-Shot Policy Optimization},
     booktitle = {ArXiv Preprint},
