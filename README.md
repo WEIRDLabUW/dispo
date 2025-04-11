@@ -66,10 +66,11 @@ python train.py --config-name roboverse.yaml env_id=roboverse-doubledrawercloseo
 If you find this code useful, please cite:
 
 ```
-@article{zhu2024dispo,
-    author    = {Zhu, Chuning and Wang, Xinqi and Han, Tyler and Du, Simon Shaolei and Gupta, Abhishek},
-    title     = {Distributional Successor Features Enable Zero-Shot Policy Optimization},
-    booktitle = {ArXiv Preprint},
-    year      = {2024},
+@inproceedings{
+    zhu2024distributional,
+    title={Distributional Successor Features Enable Zero-Shot Policy Optimization},
+    author={Chuning Zhu and Xinqi Wang and Tyler Han and Simon Shaolei Du and Abhishek Gupta},
+    booktitle={The Thirty-eighth Annual Conference on Neural Information Processing Systems},
+    year={2024},
 }
 ```
